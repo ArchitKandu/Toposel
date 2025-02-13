@@ -4,72 +4,65 @@ const generateToken = require("../config/generateToken");
 const registration = async (req, res) => {
   const { userName, password, fullName, gender, dateOfBirth, country } =
     req.body;
+  try {
+    if (
+      !userName ||
+      !password ||
+      !fullName ||
+      !gender ||
+      !dateOfBirth ||
+      !country
+    )
+      throw new Error("Please enter all required details.");
 
-  if (
-    !userName ||
-    !password ||
-    !fullName ||
-    !gender ||
-    !dateOfBirth ||
-    !country
-  ) {
-    res.status(400);
-    throw new Error("Please enter all required details.");
-  }
+    const userExists = await User.findOne({ userName });
+    if (userExists) throw new Error("User already exits with that email.");
 
-  const userExists = await User.findOne({ userName });
-  if (userExists) {
-    res.status(400);
-    throw new Error("User already exits with that email.");
-  }
-
-  const newUser = await User.create({
-    userName,
-    password,
-    fullName,
-    gender,
-    dateOfBirth,
-    country,
-  });
-  if (newUser) {
-    res.status(200).json({
-      _id: newUser._id,
-      userName: newUser.userName,
-      password: newUser.password,
-      fullName: newUser.fullName,
-      gender: newUser.gender,
-      dateOfBirth: newUser.dateOfBirth,
-      country: newUser.country,
-      token: generateToken(newUser._id),
+    const newUser = await User.create({
+      userName,
+      password,
+      fullName,
+      gender,
+      dateOfBirth,
+      country,
     });
-  } else {
-    res.status(400);
-    throw new Error("Failed to create new user.");
+    if (newUser) {
+      res.status(200).json({
+        _id: newUser._id,
+        userName: newUser.userName,
+        password: newUser.password,
+        fullName: newUser.fullName,
+        gender: newUser.gender,
+        dateOfBirth: newUser.dateOfBirth,
+        country: newUser.country,
+        token: generateToken(newUser._id),
+      });
+    } else throw new Error("Failed to create new user.");
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 };
 
 const login = async (req, res) => {
   const { userName, password } = req.body;
+  try {
+    if (!userName || !password)
+      throw new Error("Please enter all required details.");
 
-  if (!userName || !password) {
-    res.status(400);
-    throw new Error("Please enter all required details.");
-  }
-
-  const user = await User.findOne({ userName });
-  if (user && (await user.matchPassword(password))) {
-    res.status(200).json({
-      _id: user._id,
-      userName: user.userName,
-      fullName: user.fullName,
-      gender: user.gender,
-      dateOfBirth: user.dateOfBirth,
-      country: user.country,
-      token: user.token,
-    });
-  } else {
-    res.status(400);
-    throw new Error("Invalid Email or Password.");
+    const user = await User.findOne({ userName });
+    if (user && (await user.matchPassword(password))) {
+      res.status(200).json({
+        _id: user._id,
+        userName: user.userName,
+        fullName: user.fullName,
+        gender: user.gender,
+        dateOfBirth: user.dateOfBirth,
+        country: user.country,
+        token: user.token,
+      });
+    } else throw new Error("Invalid Email or Password.");
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 };
 
