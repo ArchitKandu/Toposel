@@ -1,28 +1,13 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
-
-// Getting URI from environmental variables
-const uri = process.env.MONGODB_URI;
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
+const mongoose = require("mongoose");
 
 const connectDatabase = async () => {
   try {
-    // Connect to the database
-    await client.connect();
-
-    // Send ping to verify connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Deployment is pinged. Connected to MongoDB successfully !!");
-  } finally {
-    await client.close();
+    const connect = await mongoose.connect(process.env.MONGODB_URI);
+    console.log(`MongoDB connected: ${connect.connection.host}`);
+  } catch (err) {
+    console.error("Error: ", err);
+    process.exit(1);
   }
 };
 
-module.exports = { connectDatabase };
+module.exports = connectDatabase;
