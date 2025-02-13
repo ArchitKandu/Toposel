@@ -48,4 +48,29 @@ const registration = async (req, res) => {
   }
 };
 
-module.exports = { registration };
+const login = async (req, res) => {
+  const { userName, password } = req.body;
+
+  if (!userName || !password) {
+    res.status(400);
+    throw new Error("Please enter all required details.");
+  }
+
+  const user = await User.findOne({ userName });
+  if (user && (await user.matchPassword(password))) {
+    res.status(200).json({
+      _id: user._id,
+      userName: user.userName,
+      fullName: user.fullName,
+      gender: user.gender,
+      dateOfBirth: user.dateOfBirth,
+      country: user.country,
+      token: user.token,
+    });
+  } else {
+    res.status(400);
+    throw new Error("Invalid Email or Password.");
+  }
+};
+
+module.exports = { registration, login };
