@@ -66,4 +66,22 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { registration, login };
+const search = async (req, res) => {
+  const searchRegex = new RegExp(req.query.search, "i");
+  try {
+    const keyword = req.query.search
+      ? {
+          $or: [
+            { userName: { $regex: searchRegex } },
+            { fullName: { $regex: searchRegex } },
+          ],
+        }
+      : {};
+    const users = await User.find(keyword).find({ _id: { $ne: req.user._id } });
+    res.status(200).send(users);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+module.exports = { registration, login, search };

@@ -4,6 +4,7 @@ dotenv.config();
 const express = require("express");
 const connectDatabase = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
+const { errorHandler, notFound } = require("./middleware/errorMiddleware");
 
 const app = express();
 app.use(express.json());
@@ -15,6 +16,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", userRoutes);
+app.use(notFound);
+app.use(errorHandler);
 
 const server = app.listen(
   process.env.PORT,
