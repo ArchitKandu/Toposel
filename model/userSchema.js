@@ -1,8 +1,10 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
+// Defining how the users will be saved in database along with there types and pattern if any
 const userSchema = mongoose.Schema(
   {
+    // Username is unique and is email
     userName: {
       type: String,
       required: true,
@@ -12,6 +14,7 @@ const userSchema = mongoose.Schema(
         "Invalid email format",
       ],
     },
+    // Password should be ensured to be strong
     password: {
       type: String,
       required: true,
@@ -35,6 +38,7 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    // Genders should be Male, Female or Other
     gender: {
       type: String,
       required: true,
@@ -62,6 +66,7 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified) {
     next();
   }
+  // bcrypt package is use for salt creation and hashing of password to encrypt it when stored in database
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
